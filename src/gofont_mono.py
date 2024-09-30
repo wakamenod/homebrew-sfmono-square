@@ -11,9 +11,9 @@ OLD_WIDTH = 1266
 WIDTH = 1024
 ITALIC = "Italic"
 SCALE_DOWN = float(WIDTH) / OLD_WIDTH
-FAMILY = "SF Mono"
-FILE_PREFIX = "SF-Mono-"
-PS_FAMILY = "SFMono"
+FAMILY = "Go Mono"  # SF MonoからGo Monoに変更
+FILE_PREFIX = "Go-Mono-"  # ファイルのプレフィックスを変更
+PS_FAMILY = "GoMono"  # PostScriptファミリー名を変更
 FAMILY_SUFFIX = "1x2"
 LIGHT_SHADE = 0x2591  # ░
 MEDIUM_SHADE = 0x2592  # ▒
@@ -44,9 +44,23 @@ def modify(in_file):
     name, ext = splitext(in_file)
     style = name.replace(FILE_PREFIX, "")
     regular_font = ""
+
+    # ファイル名からスタイルを判別して、通常フォント（Regular または Bold）を指定
     if ITALIC in style:
+        # イタリックスタイルが含まれている場合、イタリック部分を除いて通常フォントを探す
         index = style.find(ITALIC)
-        regular_font = f"{FILE_PREFIX}{style[:index]}{ext}"
+        base_style = style[:index]  # "Bold-Italic" なら "Bold" を取得
+        if base_style == "Bold":
+            regular_font = f"{FILE_PREFIX}Bold{ext}"  # Go-Mono-Bold.ttf を使用
+        else:
+            regular_font = f"{FILE_PREFIX[:-1]}{ext}"  # Go-Mono.ttf を使用
+    else:
+        # イタリックでない場合、そのまま
+        if style == "Bold":
+            regular_font = f"{FILE_PREFIX}Bold{ext}"  # Go-Mono-Bold.ttf
+        else:
+            regular_font = f"{FILE_PREFIX[:-1]}{ext}"  # Go-Mono.ttf (Regular)
+
     font = fontforge.open(in_file)
     if regular_font:
         font.mergeFonts(regular_font)

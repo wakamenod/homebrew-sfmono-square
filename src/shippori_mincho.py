@@ -37,7 +37,7 @@ def oblique(in_file):
     name, ext = splitext(in_file)
     in_style = name.split("-")[-1]
     style = "oblique" if in_style == "regular" else "bold-oblique"
-    out_file = f"modified-migu-1m-{style}{ext}"
+    out_file = f"modified-ShipporiMincho-{style}{ext}"
     print(f"Generate {out_file}")
     font.generate(out_file, flags=("opentype",))
     return 0

@@ -3,55 +3,53 @@ import sys
 
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import font_patcher
-import migu1m
-import sfmono
+import shippori_mincho
+import gofont_mono
 import sfmono_square
 import fonttools
 
-
-MIGU1M = [["migu-1m-regular.ttf"], ["migu-1m-bold.ttf"]]
-MIGU1M_MODIFIED = [["modified-migu-1m-regular.ttf"], ["modified-migu-1m-bold.ttf"]]
-SFMONO = [
-    ["SF-Mono-Regular.otf"],
-    ["SF-Mono-Bold.otf"],
-    ["SF-Mono-RegularItalic.otf"],
-    ["SF-Mono-BoldItalic.otf"],
+SHIPPORI_MINCHO = [["ShipporiMincho-Regular.ttf"], ["ShipporiMincho-Bold.ttf"]]
+SHIPPORI_MINCHO_MODIFIED = [["modified-ShipporiMincho-regular.ttf"], ["modified-ShipporiMincho-bold.ttf"]]
+GOFONT_MONO = [
+    ["Go-Mono.ttf"],
+    ["Go-Mono-Bold.ttf"],
+    ["Go-Mono-Italic.ttf"],
+    ["Go-Mono-Bold-Italic.ttf"],
 ]
-SFMONO_MIGU1M = [
-    ["SFMono-1x2-Regular.otf", "modified-migu-1m-regular.ttf"],
-    ["SFMono-1x2-Bold.otf", "modified-migu-1m-bold.ttf"],
-    ["SFMono-1x2-RegularItalic.otf", "modified-migu-1m-oblique.ttf"],
-    ["SFMono-1x2-BoldItalic.otf", "modified-migu-1m-bold-oblique.ttf"],
+GOFONT_MONO_SHIPPORI_MINCHO = [
+    ["GoMono-1x2-Go-Mono.ttf", "modified-ShipporiMincho-Regular.ttf"],
+    ["GoMono-1x2-Bold.ttf", "modified-ShipporiMincho-Bold.ttf"],
+    ["GoMono-1x2-Italic.ttf", "modified-ShipporiMincho-oblique.ttf"],
+    ["GoMono-1x2-Bold-Italic.ttf", "modified-ShipporiMincho-bold-oblique.ttf"],
 ]
-SFMONO_SQUARE = [
-    ["SFMonoSquare-Regular.otf", "Regular"],
-    ["SFMonoSquare-Bold.otf", "Bold"],
-    ["SFMonoSquare-RegularItalic.otf", "RegularItalic"],
-    ["SFMonoSquare-BoldItalic.otf", "BoldItalic"],
+GOFONT_MONO_SQUARE = [
+    ["GoMonoSquare-Mono.otf", "Regular"],
+    ["GoMonoSquare-Bold.otf", "Bold"],
+    ["GoMonoSquare-Italic.otf", "RegularItalic"],
+    ["GoMonoSquare-Bold-Italic.otf", "BoldItalic"],
 ]
 OUT_DIR = "build"
 
-
 def build(version):
-    print("---- modifying migu-1m ----")
-    if concurrent_execute(migu1m.modify, MIGU1M):
+    print("---- modifying Shippori Mincho ----")
+    if concurrent_execute(shippori_mincho.modify, SHIPPORI_MINCHO):
         return 1
-    print("---- making oblique version of migu-1m ----")
-    if concurrent_execute(migu1m.oblique, MIGU1M_MODIFIED):
+    print("---- making oblique version of Shippori Mincho ----")
+    if concurrent_execute(shippori_mincho.oblique, SHIPPORI_MINCHO_MODIFIED):
         return 1
-    print("---- modifying SF Mono ----")
-    if concurrent_execute(sfmono.modify, SFMONO):
+    print("---- modifying Go Mono ----")
+    if concurrent_execute(gofont_mono.modify, GOFONT_MONO):
         return 1
-    print("---- generate SF Mono Square ----")
-    args = [a + [version] for a in SFMONO_MIGU1M]
+    print("---- generate Go Mono Square ----")
+    args = [a + [version] for a in GOFONT_MONO_SHIPPORI_MINCHO]
     if concurrent_execute(sfmono_square.generate, args):
         return 1
     print("---- adding nerd-fonts glyphs ----")
-    args = [[a[0], OUT_DIR] for a in SFMONO_SQUARE]
+    args = [[a[0], OUT_DIR] for a in GOFONT_MONO_SQUARE]
     if concurrent_execute(font_patcher.patch, args):
         return 1
     print("---- overwriting table with fonttools")
-    args = [[f"{OUT_DIR}/{a[0]}", a[1]] for a in SFMONO_SQUARE]
+    args = [[f"{OUT_DIR}/{a[0]}", a[1]] for a in GOFONT_MONO_SQUARE]
     if concurrent_execute(fonttools.update, args):
         return 1
     return 0

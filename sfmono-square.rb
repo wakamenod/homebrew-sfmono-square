@@ -4,27 +4,30 @@
 class SfmonoSquare < Formula
   desc "Square-sized SF Mono + Japanese fonts + nerd-fonts"
   homepage "https://github.com/delphinus/homebrew-sfmono-square"
-  url "https://github.com/delphinus/homebrew-sfmono-square/archive/v3.2.6.tar.gz"
-  sha256 "ebcde3c177b1efefbcc4b5689fe0cc456b7a3272f40cc83d9c95121a85da7a9a"
+  # url "https://github.com/delphinus/homebrew-sfmono-square/archive/v3.2.6.tar.gz"
+  url "file:///Users/wakame/Projects/github/homebrew-sfmono-square"
+  # sha256 "ebcde3c177b1efefbcc4b5689fe0cc456b7a3272f40cc83d9c95121a85da7a9a"
   version "3.2.6"
-  head "https://github.com/delphinus/homebrew-sfmono-square.git"
+  # head "https://github.com/delphinus/homebrew-sfmono-square.git"
 
   depends_on "fontforge" => :build
   depends_on "fonttools" => :build
   depends_on "python@3.12" => :build
   depends_on "pod2man" => :build
 
-  resource "migu1mfonts" do
-    output = `#{Utils::Curl.curl_executable} --version`
-    curl_name_and_version = output.sub(/^.*?lib(?=curl)/, "").sub(/\s+.*/m, "")
-    url "https://github.com/itouhiro/mixfont-mplus-ipa/releases/download/v2020.0307/migu-1m-20200307.zip",
-        user_agent: curl_name_and_version
-    sha256 "e4806d297e59a7f9c235b0079b2819f44b8620d4365a8955cb612c9ff5809321"
+  resource "shippori_mincho_regular" do
+    url "https://github.com/google/fonts/raw/main/ofl/shipporimincho/ShipporiMincho-Regular.ttf"
+    sha256 "769b5269f0f9bc6534b352c0e6bd856a566e03ff788f107191c2d835863570b2"
   end
 
-  resource "sfmono" do
-    url "https://developer.apple.com/design/downloads/SF-Mono.dmg"
-    sha256 "6d4a0b78e3aacd06f913f642cead1c7db4af34ed48856d7171a2e0b55d9a7945"
+  resource "shippori_mincho_bold" do
+    url "https://github.com/google/fonts/raw/main/ofl/shipporimincho/ShipporiMincho-Bold.ttf"
+    sha256 "63bc4eddc74793f671c3ab827c5175e773ffbe569d0bf50ee65375ea9e3bc286"
+  end
+
+  resource "go_fonts" do
+    url "https://go.googlesource.com/image/+archive/refs/heads/master/font/gofont/ttfs.tar.gz"
+    sha256 "a2a69ac17d46b1b4ae8c28b2077e2b626dd02d03f9f6466d38c456f65cf676b7"
   end
 
   def install
@@ -42,17 +45,16 @@ class SfmonoSquare < Formula
   end
 
   def _stage
-    resource("migu1mfonts").stage { buildpath.install Dir["*"] }
+    resource("shippori_mincho_regular").stage { buildpath.install Dir["*.ttf"] }
+    resource("shippori_mincho_bold").stage { buildpath.install Dir["*.ttf"] }
 
-    resource("sfmono").stage do
-      system "/usr/bin/xar", "-xf", "SF Mono Fonts.pkg"
-      system "/bin/bash", "-c", "cat SFMonoFonts.pkg/Payload | gunzip -dc | cpio -i"
-      ["SF-Mono-Regular.otf", "SF-Mono-RegularItalic.otf", "SF-Mono-Bold.otf", "SF-Mono-BoldItalic.otf"].each do |otf|
-        buildpath.install "Library/Fonts/#{otf}"
-      end
+    resource("go_fonts").stage do
+      system "tar", "-xvf", "ttfs.tar.gz"
+      buildpath.install Dir["*"]
     end
   end
 
+  # Uncomment and change this value to enlarge glyphs from Migu1M.
   def _compile
     # Uncomment and change this value to enlarge glyphs from Migu1M.
     # See https://github.com/delphinus/homebrew-sfmono-square/issues/9
