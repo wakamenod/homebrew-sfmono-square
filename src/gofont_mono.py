@@ -7,7 +7,7 @@ import fontforge
 from psMat import compose, scale, translate
 
 
-OLD_WIDTH = 1266
+OLD_WIDTH = 1229
 WIDTH = 1024
 ITALIC = "Italic"
 SCALE_DOWN = float(WIDTH) / OLD_WIDTH

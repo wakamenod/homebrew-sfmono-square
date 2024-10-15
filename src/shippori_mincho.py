@@ -6,7 +6,7 @@ import fontforge
 import psMat
 
 
-ASCENT = 1638
+ASCENT = 1635
 DESCENT = 410
 OLD_EM = 1000
 EM = ASCENT + DESCENT
@@ -59,8 +59,15 @@ def _set_new_em(font):
 def _set_proportion(font):
     scale = psMat.scale(SCALE)
     font.selection.all()
+    processed_glyphs = set()  # 既に処理したグリフのコードポイントを保持するセット
+
     for glyph in list(font.selection.byGlyphs):
-        is_hankaku_kana = glyph.encoding in range(*HANKAKU_KANA)
+        codepoint = glyph.encoding
+        if codepoint in processed_glyphs:
+            continue  # 既に処理済みのグリフはスキップ
+        processed_glyphs.add(codepoint)
+
+        is_hankaku_kana = codepoint in range(*HANKAKU_KANA)
         x_to_center = X_TO_CENTER / 2 if is_hankaku_kana else X_TO_CENTER
         trans = psMat.translate(x_to_center, 0)
         mat = psMat.compose(scale, trans)
